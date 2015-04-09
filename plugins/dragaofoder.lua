@@ -23,7 +23,7 @@ function save_to_game(userid,gameid)
   table.insert(_list, userid);
 
   serialize_to_file(_list, './data/dragaofoder/'.. gameid ..'.lua')
-  
+
 end
 
 function run(msg, matches)
@@ -66,7 +66,7 @@ function run(msg, matches)
 
       end
       --///////////////////
-      return "Messaging everyone to play " .. matches[2]; 
+      return "Messaging everyone to play " .. matches[2];
     end
 end
 
@@ -79,8 +79,8 @@ return {
   patterns = {
     "^!pla(y) (.*)$",
     "^!pla(yadd) (.*)$"
-  }, 
-  run = run 
+  },
+  run = run
 }
 
 end
