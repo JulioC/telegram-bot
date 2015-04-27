@@ -55,8 +55,13 @@ function string:trim()
 end
 
 function get_http_file_name(url, headers)
-  -- Everything after the last /
-  local file_name = url:match("([^/]+)$")
+  -- Eg: fooo.var
+  local file_name = url:match("[^%w]+([%.%w]+)$")
+  -- Any delimited aphanumeric on the url
+  file_name = file_name or url:match("[^%w]+(%w+)[^%w]+$")
+  -- Random name, hope content-type works
+  file_name = file_name or str:random(5)
+
   -- Possible headers names
   local content_type = headers["content-type"] 
   
@@ -111,50 +116,16 @@ function download_to_file(url, file_name)
   return file_path
 end
 
-
-function vardump(value, depth, key)
-  local linePrefix = ""
-  local spaces = ""
-  
-  if key ~= nil then
-    linePrefix = "["..key.."] = "
-  end
-  
-  if depth == nil then
-    depth = 0
-  else
-    depth = depth + 1
-    for i=1, depth do spaces = spaces .. "  " end
-  end
-  
-  if type(value) == 'table' then
-    mTable = getmetatable(value)
-    if mTable == nil then
-      print(spaces ..linePrefix.."(table) ")
-    else
-      print(spaces .."(metatable) ")
-        value = mTable
-    end		
-    for tableKey, tableValue in pairs(value) do
-      vardump(tableValue, depth, tableKey)
-    end
-  elseif type(value)	== 'function' or 
-      type(value)	== 'thread' or 
-      type(value)	== 'userdata' or
-      value		== nil
-  then
-    print(spaces..tostring(value))
-  else
-    print(spaces..linePrefix.."("..type(value)..") "..tostring(value))
-  end
+function vardump(value)
+  print(serpent.block(value, {comment=false}))
 end
 
 -- taken from http://stackoverflow.com/a/11130774/3163199
 function scandir(directory)
   local i, t, popen = 0, {}, io.popen
   for filename in popen('ls -a "'..directory..'"'):lines() do
-      i = i + 1
-      t[i] = filename
+    i = i + 1
+    t[i] = filename
   end
   return t
 end
@@ -456,4 +427,19 @@ function match_pattern(pattern, text)
     end
   end
   -- nil
+end
+
+-- Function to read data from files
+function load_from_file(file)
+  local f = io.open(file, "r+")
+  -- If file doesn't exists
+  if f == nil then
+    -- Create a new empty table
+    serialize_to_file({}, file)
+    print ('Created file', file)
+  else
+    print ('Data loaded from file', file)
+    f:close() 
+  end
+  return loadfile (file)()
 end
